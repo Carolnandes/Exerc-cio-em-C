@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_CLIENTES 100
+
+typedef struct {
+    char nome[50];
+    char cpf[12];
+    int tipoAtendimento;
+} Cliente;
+
+Cliente clientes[MAX_CLIENTES];
+int totalClientes = 0;
+
+
+void cadastrarCliente() {
+    if (totalClientes < MAX_CLIENTES) {
+        FILE *file = fopen("clientes.txt", "a");
+
+        if (file == NULL) {
+            printf("Erro ao abrir o arquivo.\n");
+            exit(1);
+        }
+
+        Cliente novoCliente;
+
+        printf("Nome: ");
+        scanf("%s", novoCliente.nome);
+        printf("CPF: ");
+        scanf("%s", novoCliente.cpf);
+        printf("Tipo de Atendimento (1-Abertura de Conta, 2-Caixa, 3-Gerente PF, 4-Gerente PJ): ");
+        scanf("%d", &novoCliente.tipoAtendimento);
+
+        fprintf(file, "%s %s %d\n", novoCliente.nome, novoCliente.cpf, novoCliente.tipoAtendimento);
+
+        fclose(file);
+
+        printf("Cliente cadastrado com sucesso!\n");
+    } else {
+        printf("Limite de clientes atingido.\n");
+    }
+}
+
+void listarTodosAtendimentos() {
+    FILE *file = fopen("clientes.txt", "r");
+
+    if (file == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        exit(1);
+    }
+
+    printf("\nLista de todos os atendimentos registrados:\n");
+
+    while (fscanf(file, "%s %s %d", clientes[totalClientes].nome, clientes[totalClientes].cpf, &clientes[totalClientes].tipoAtendimento) == 3) {
+        printf("Nome: %s, CPF: %s, Setor: %d\n", clientes[totalClientes].nome, clientes[totalClientes].cpf, clientes[totalClientes].tipoAtendimento);
+        totalClientes++;
+    }
+
+    fclose(file);
+
+    if (totalClientes == 0) {
+        printf("Nenhum atendimento registrado.\n");
+    }
+}
+
+void listarAtendimentoPorTipo(int tipo) {
+    FILE *file = fopen("clientes.txt", "r");
+
+    if (file == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        exit(1);
+    }
+
+    printf("\nLista de atendimentos do tipo %d:\n", tipo);
+
+    int clientesLidos = 0;
+
+    while (fscanf(file, "%s %s %d", clientes[clientesLidos].nome, clientes[clientesLidos].cpf, &clientes[clientesLidos].tipoAtendimento) == 3) {
+        if (clientes[clientesLidos].tipoAtendimento == tipo) {
+            printf("Nome: %s, CPF: %s\n", clientes[clientesLidos].nome, clientes[clientesLidos].cpf);
+        }
+        clientesLidos++;
+    }
+
+    fclose(file);
+
+    if (clientesLidos == 0) {
+        printf("Nenhum atendimento do tipo %d registrado.\n", tipo);
+    }
+}
+
+int main() {
+    int opcao;
+
+    do {
+        printf("\nBem-vindo ao sistema de atendimento\n");
+        printf("1 - Solicitar Atendimento\n");
+        printf("2 - Listar Atendimentos Registrados\n");
+        printf("3 - Listar Atendimento por Setor\n");
+        printf("4 - Sair\n");
+        printf("Escolha a opção desejada: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                cadastrarCliente();
+                break;
+            case 2:
+                listarTodosAtendimentos();
+                break;
+            case 3:
+                printf("Digite o tipo de atendimento (1-Abertura de Conta, 2-Caixa, 3-Gerente PF, 4-Gerente PJ): ");
+                scanf("%d", &opcao);
+                listarAtendimentoPorTipo(opcao);
+                break;
+            case 4:
+                printf("Saindo do sistema. Até logo!\n");
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    } while (opcao != 4);
+
+    return 0;
+}
